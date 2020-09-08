@@ -1,0 +1,85 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.0
+  creationTimestamp: null
+  name: monitors.datadog.jonnylangefeld.com
+spec:
+  group: datadog.jonnylangefeld.com
+  names:
+    kind: Monitor
+    listKind: MonitorList
+    plural: monitors
+    singular: monitor
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Monitor is the Schema for the monitors API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitorSpec defines the desired state of Monitor
+            properties:
+              message:
+                description: Message of the monitor
+                type: string
+              name:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file
+                  Name of the monitor'
+                type: string
+              options:
+                description: Options of the monitor
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              query:
+                description: Query of the monitor
+                type: string
+              tags:
+                description: Tags of the monitor
+                items:
+                  type: string
+                type: array
+              type:
+                description: Type of the monitor
+                type: string
+            required:
+            - message
+            - name
+            - query
+            - type
+            type: object
+          status:
+            description: MonitorStatus defines the observed state of Monitor
+            properties:
+              id:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file ID of the monitor'
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
