@@ -17,16 +17,18 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
-	"github.com/spf13/viper"
-
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 
 	"github.com/zorkian/go-datadog-api"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -52,18 +54,16 @@ func init() {
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
+	var K8sSecretPath string
 	var secretsPath string
 	pflag.StringVarP(&metricsAddr, "metrics-addr", "m", ":8080", "The address the metric endpoint binds to.")
 	pflag.BoolVarP(&enableLeaderElection, "enable-leader-election", "l", false, "Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
+	pflag.StringVarP(&K8sSecretPath, "k8s-secret-path", "p", "", "Enable k8s secret as a holder for Datadog API, Application keys")
 	pflag.StringVarP(&secretsPath, "secrets-path", "s", ".secrets.json", "The path to the config file")
 	flag.Parse()
-	viper.SetConfigFile(secretsPath)
-	viper.AddConfigPath(".")
-	_ = viper.ReadInConfig()
-	viper.SetEnvPrefix("datadog")
-	viper.AutomaticEnv()
-	datadogAPIKey := viper.GetString("api_key")
-	datadogApplicationKey := viper.GetString("application_key")
+
+	datadogAPIKey := ""
+	datadogApplicationKey := ""
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(false)))
 
@@ -78,10 +78,30 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
+	k8sClient := mgr.GetClient()
+
+	if K8sSecretPath != "" {
+		// Deploy k8s secret to datadog-operator-system
+		ctx := context.Background()
+		key := types.NamespacedName{Namespace: "paas-system", Name: K8sSecretPath}
+		secretObj := &corev1.Secret{}
+		k8sClient.Get(ctx, key, secretObj)
+
+		datadogAPIKey = string(secretObj.Data["datadogAPIKey"])
+		datadogApplicationKey = string(secretObj.Data["datadogApplicationKey"])
+	} else {
+		viper.SetConfigFile(secretsPath)
+		viper.AddConfigPath(".")
+		_ = viper.ReadInConfig()
+		viper.SetEnvPrefix("datadog")
+		viper.AutomaticEnv()
+		datadogAPIKey = viper.GetString("api_key")
+		datadogApplicationKey = viper.GetString("application_key")
+	}
 
 	datadogClient := datadog.NewClient(datadogAPIKey, datadogApplicationKey)
 	if err = (&datadogcontroller.MonitorReconciler{
-		Client:        mgr.GetClient(),
+		Client:        k8sClient,
 		Log:           ctrl.Log.WithName("controllers").WithName("Monitor"),
 		Scheme:        mgr.GetScheme(),
 		DatadogClient: datadogClient,
