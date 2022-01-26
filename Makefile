@@ -1,6 +1,6 @@
 VERSION ?= $(shell git describe --match 'v[0-9]*' --tags --always)
 # Image URL to use all building/pushing image targets
-IMG ?= jonnylangefeld/datadog-controller:$(VERSION)
+IMG ?= jonnylangefeld/datadog-operator:$(VERSION)
 CRD_OPTIONS ?= "crd:crdVersions=v1"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
