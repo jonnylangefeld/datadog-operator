@@ -10,15 +10,6 @@ resources:
     namespaced: true
   controller: true
   domain: jonnylangefeld.com
-  group: datadog.jonnylangefeld.com
-  kind: Monitor
-  path: github.com/jonnylangefeld/datadog-operator/api/v1
-  version: v1
-- api:
-    crdVersion: v1
-    namespaced: true
-  controller: true
-  domain: jonnylangefeld.com
   group: datadog
   kind: Monitor
   path: github.com/jonnylangefeld/datadog-operator/apis/datadog/v1
