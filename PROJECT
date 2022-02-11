@@ -1,8 +1,26 @@
 domain: jonnylangefeld.com
+layout:
+- go.kubebuilder.io/v3
 multigroup: true
+projectName: migration-datadog-operator
 repo: github.com/jonnylangefeld/datadog-operator
 resources:
-- group: datadog
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: jonnylangefeld.com
+  group: datadog.jonnylangefeld.com
   kind: Monitor
-  version: v1alpha1
-version: "2"
+  path: github.com/jonnylangefeld/datadog-operator/api/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: jonnylangefeld.com
+  group: datadog
+  kind: Monitor
+  path: github.com/jonnylangefeld/datadog-operator/apis/datadog/v1
+  version: v1
+version: "3"

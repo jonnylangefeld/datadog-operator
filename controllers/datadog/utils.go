@@ -3,8 +3,6 @@ package controllers
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/runtime"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -25,8 +23,8 @@ func Delete(ctx context.Context, c client.Client, object interface{}, id int, fi
 		if err := f(id); err != nil {
 			return ctrl.Result{}, err
 		}
-		controllerutil.RemoveFinalizer(object.(metav1.Object), finalizer)
-		if err := c.Update(ctx, object.(runtime.Object)); err != nil {
+		controllerutil.RemoveFinalizer(object.(client.Object), finalizer)
+		if err := c.Update(ctx, object.(client.Object)); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
