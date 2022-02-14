@@ -85,6 +85,17 @@ ifndef ignore-not-found
   ignore-not-found = false
 endif
 
+tools:
+	@{ \
+	set -e ;\
+	TOOLS_TMP_DIR=$$(mktemp -d) ;\
+	cp tools.go $$TOOLS_TMP_DIR ;\
+	cd $$TOOLS_TMP_DIR ;\
+	go mod init tmp ;\
+	cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go get % ;\
+	rm -rf $$TOOLS_TMP_DIR ;\
+	}
+
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
