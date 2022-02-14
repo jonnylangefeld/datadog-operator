@@ -42,8 +42,8 @@ help: ## Display this help.
 ##@ Development
 
 .PHONY: manifests
-manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+manifests: tools
+	$(GOBIN)/controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -84,17 +84,6 @@ docker-push: ## Push docker image with the manager.
 ifndef ignore-not-found
   ignore-not-found = false
 endif
-
-tools:
-	@{ \
-	set -e ;\
-	TOOLS_TMP_DIR=$$(mktemp -d) ;\
-	cp tools.go $$TOOLS_TMP_DIR ;\
-	cd $$TOOLS_TMP_DIR ;\
-	go mod init tmp ;\
-	cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go get % ;\
-	rm -rf $$TOOLS_TMP_DIR ;\
-	}
 
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
@@ -141,3 +130,14 @@ GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef
+
+tools:
+	@{ \
+	set -e ;\
+	TOOLS_TMP_DIR=$$(mktemp -d) ;\
+	cp tools.go $$TOOLS_TMP_DIR ;\
+	cd $$TOOLS_TMP_DIR ;\
+	go mod init tmp ;\
+	cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go get % ;\
+	rm -rf $$TOOLS_TMP_DIR ;\
+	}
