@@ -117,6 +117,11 @@ ENVTEST = $(shell pwd)/bin/setup-envtest
 envtest: ## Download envtest-setup locally if necessary.
 	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
 
+MOCKGEN = $(shell pwd)/bin/mockgen
+.PHONY: mockgen
+mockgen: ## Download mockgen locally if necessary.
+	$(call go-get-tool,$(MOCKGEN),github.com/golang/mock/mockgen@v1.6.0)
+
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
@@ -130,14 +135,3 @@ GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef
-
-tools:
-	@{ \
-	set -e ;\
-	TOOLS_TMP_DIR=$$(mktemp -d) ;\
-	cp tools.go $$TOOLS_TMP_DIR ;\
-	cd $$TOOLS_TMP_DIR ;\
-	go mod init tmp ;\
-	cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go get % ;\
-	rm -rf $$TOOLS_TMP_DIR ;\
-	}
