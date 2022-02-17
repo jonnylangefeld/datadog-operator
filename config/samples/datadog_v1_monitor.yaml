@@ -1,0 +1,11 @@
+apiVersion: datadog.jonnylangefeld.com/v1
+kind: Monitor
+metadata:
+  name: monitor-sample-3
+spec:
+  name: "test-3"
+  type: "metric alert"
+  message: "hello datadog 4"
+  query: 'avg(last_5m):avg:datadog.estimated_usage.containers{*} > 1'
+  tags:
+  - "test"

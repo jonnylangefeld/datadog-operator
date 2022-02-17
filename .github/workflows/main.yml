@@ -15,17 +15,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install kubebuilder
-        run: |
-          os=$(go env GOOS)
-          arch=$(go env GOARCH)
-
-          # download kubebuilder and extract it to tmp
-          curl -L https://go.kubebuilder.io/dl/3.1.0/${os}/${arch} | tar -xz -C /tmp/
-
-          # move to a long-term location and put it on your path
-          sudo mv /tmp/kubebuilder_3.1.0_${os}_${arch} /usr/local/kubebuilder
-          export PATH=$PATH:/usr/local/kubebuilder/bin
       - name: Docker login
         uses: docker/login-action@v1
         with:

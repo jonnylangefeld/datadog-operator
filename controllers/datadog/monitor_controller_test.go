@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	datadogv1alpha1 "github.com/jonnylangefeld/datadog-operator/apis/datadog/v1alpha1"
+	datadogv1 "github.com/jonnylangefeld/datadog-operator/apis/datadog/v1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -9,12 +9,12 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-var testMonitor = &datadogv1alpha1.Monitor{
+var testMonitor = &datadogv1.Monitor{
 	ObjectMeta: metav1.ObjectMeta{
 		Name:      "test-monitor",
 		Namespace: "default",
 	},
-	Spec: datadogv1alpha1.MonitorSpec{
+	Spec: datadogv1.MonitorSpec{
 		Name:    "test monitor",
 		Type:    "metric alert",
 		Message: "test message",
@@ -30,7 +30,7 @@ var _ = Describe("Monitor Controller", func() {
 		It("Should reconcile", func() {
 			Expect(k8sClient.Create(testContext, testMonitor)).Should(Succeed())
 			Eventually(func() bool {
-				got := &datadogv1alpha1.Monitor{}
+				got := &datadogv1.Monitor{}
 				_ = k8sClient.Get(testContext, types.NamespacedName{Name: testMonitor.Name, Namespace: testMonitor.Namespace}, got)
 				return got.Status.ID != 0
 			}, timeout, interval).Should(BeTrue())
@@ -39,7 +39,7 @@ var _ = Describe("Monitor Controller", func() {
 		It("Should reconcile", func() {
 			Expect(k8sClient.Delete(testContext, testMonitor)).Should(Succeed())
 			Eventually(func() bool {
-				ml := &datadogv1alpha1.MonitorList{}
+				ml := &datadogv1.MonitorList{}
 				_ = k8sClient.List(testContext, ml)
 				return len(ml.Items) == 0
 			}, timeout, interval).Should(BeTrue())

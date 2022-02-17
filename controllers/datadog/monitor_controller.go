@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	datadogv1alpha1 "github.com/jonnylangefeld/datadog-operator/apis/datadog/v1alpha1"
+	datadogv1 "github.com/jonnylangefeld/datadog-operator/apis/datadog/v1"
 	"github.com/jonnylangefeld/datadog-operator/pkg/datadog"
 )
 
@@ -45,11 +45,10 @@ type MonitorReconciler struct {
 // +kubebuilder:rbac:groups=datadog.jonnylangefeld.com,resources=monitors,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=datadog.jonnylangefeld.com,resources=monitors/status,verbs=get;update;patch
 
-func (r *MonitorReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *MonitorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("monitor", req.NamespacedName)
 
-	m := &datadogv1alpha1.Monitor{}
+	m := &datadogv1.Monitor{}
 	if err := r.Get(ctx, req.NamespacedName, m); err != nil {
 		if client.IgnoreNotFound(err) != nil {
 			log.Error(err, "unable to fetch monitor")
@@ -58,7 +57,7 @@ func (r *MonitorReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if !m.DeletionTimestamp.IsZero() {
-		return Delete(ctx, r, m, m.Status.ID, monitorFinalizer, r.DatadogClient.DeleteMonitor)
+		return Delete(ctx, r.Client, m, m.Status.ID, monitorFinalizer, r.DatadogClient.DeleteMonitor)
 	}
 	controllerutil.AddFinalizer(m, monitorFinalizer)
 
@@ -69,7 +68,7 @@ func (r *MonitorReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func (r *MonitorReconciler) CreateOrUpdate(ctx context.Context, m *datadogv1alpha1.Monitor) error {
+func (r *MonitorReconciler) CreateOrUpdate(ctx context.Context, m *datadogv1.Monitor) error {
 	transformed, err := m.Transform()
 	if err != nil {
 		return err
@@ -93,6 +92,6 @@ func (r *MonitorReconciler) CreateOrUpdate(ctx context.Context, m *datadogv1alph
 
 func (r *MonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&datadogv1alpha1.Monitor{}).
+		For(&datadogv1.Monitor{}).
 		Complete(r)
 }
