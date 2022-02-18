@@ -1,6 +1,6 @@
 module github.com/jonnylangefeld/datadog-operator
 
-go 1.17
+go 1.16
 
 require (
 	github.com/go-logr/logr v1.2.0
