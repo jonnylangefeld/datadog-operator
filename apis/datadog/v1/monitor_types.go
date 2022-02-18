@@ -56,7 +56,6 @@ type MonitorStatus struct {
 }
 
 //+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
 
 // Monitor is the Schema for the monitors API
 type Monitor struct {

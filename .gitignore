@@ -25,3 +25,6 @@ bin
 
 # secrets
 .secrets*
+
+# kubectl
+controllers/datadog/kubectl

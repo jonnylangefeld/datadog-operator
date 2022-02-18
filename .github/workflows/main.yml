@@ -1,17 +1,27 @@
-name: Build and push
+name: CI
 
 on:
   push:
-    branches:
-      - master
   create:
     tags:
       - '*'
 
 jobs:
+  test:
+    name: Lint and test
+    runs-on: ubuntu-20.04
+    container: golang:1.17
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: vet
+        run: make vet
+      - name: test
+        run: make test-ci
   build:
+    needs: test
     name: Build and push
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
