@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"os"
 
 	"github.com/spf13/viper"
@@ -41,7 +40,7 @@ func main() {
 	pflag.StringVarP(&metricsAddr, "metrics-addr", "m", ":8080", "The address the metric endpoint binds to.")
 	pflag.BoolVarP(&enableLeaderElection, "enable-leader-election", "l", false, "Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	pflag.StringVarP(&secretsPath, "secrets-path", "s", ".secrets.json", "The path to the config file")
-	flag.Parse()
+	pflag.Parse()
 	viper.SetConfigFile(secretsPath)
 	viper.AddConfigPath(".")
 	_ = viper.ReadInConfig()
