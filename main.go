@@ -1,13 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/viper"
+	"github.com/zorkian/go-datadog-api"
 
 	"github.com/spf13/pflag"
-
-	"github.com/zorkian/go-datadog-api"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -41,15 +41,20 @@ func main() {
 	pflag.BoolVarP(&enableLeaderElection, "enable-leader-election", "l", false, "Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	pflag.StringVarP(&secretsPath, "secrets-path", "s", ".secrets.json", "The path to the config file")
 	pflag.Parse()
+	viper.SetConfigType("json")
 	viper.SetConfigFile(secretsPath)
 	viper.AddConfigPath(".")
-	_ = viper.ReadInConfig()
+	err := viper.ReadInConfig()
+	if err != nil {
+		fmt.Println(err)
+	}
 	viper.SetEnvPrefix("datadog")
 	viper.AutomaticEnv()
 	datadogAPIKey := viper.GetString("api_key")
 	datadogApplicationKey := viper.GetString("application_key")
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(false)))
+	setupLog.Info(fmt.Sprintf("API is mounted. Length: %d", len(datadogAPIKey)+len(datadogApplicationKey)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
