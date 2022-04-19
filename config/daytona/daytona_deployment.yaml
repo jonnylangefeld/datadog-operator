@@ -33,3 +33,4 @@ spec:
         volumeMounts:
         - mountPath: /home/vault
           name: vault-secrets
+          
