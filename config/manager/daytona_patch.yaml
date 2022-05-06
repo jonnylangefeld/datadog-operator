@@ -1,0 +1,49 @@
+# This patch injects daytona https://github.com/cruise-automation/daytona to use as vault client to handle secrets to feed into datadog operator
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: controller-manager
+  namespace: system
+spec:
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+    spec:
+      volumes:
+      - emptyDir:
+          medium: Memory
+        name: vault-secrets
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 10
+      initContainers:
+      - envFrom:
+        - configMapRef:
+            name: daytona
+        image: gcr.io/cruise-gcr-prod/daytona:1.2.2
+        imagePullPolicy: IfNotPresent
+        name: daytona
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 9999
+        volumeMounts:
+        - mountPath: /home/vault
+          name: vault-secrets
+      containers:
+      - args:
+        command:
+        - /manager
+        - -s
+        - /home/vault/secrets
+        name: manager
+        volumeMounts:
+        - name: vault-secrets
+          mountPath: /home/vault
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 9999
+          
