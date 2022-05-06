@@ -46,7 +46,8 @@ func main() {
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
 	if err != nil {
-		fmt.Println(err)
+		setupLog.Error(err, "unable to fetch datadog secret")
+		os.Exit(1)
 	}
 	viper.SetEnvPrefix("datadog")
 	viper.AutomaticEnv()
